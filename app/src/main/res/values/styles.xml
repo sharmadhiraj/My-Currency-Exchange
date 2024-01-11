@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/edit_text_border</item>
+        <item name="android:textColor">@color/edit_text_text_color</item>
+    </style>
+
+    <style name="SpinnerStyle" parent="Widget.AppCompat.Spinner">
+        <item name="android:dropDownSelector">@color/spinner_dropdown_selector</item>
+    </style>
+
+
+</resources>
