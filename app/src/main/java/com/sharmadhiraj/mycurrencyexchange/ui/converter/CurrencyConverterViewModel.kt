@@ -7,9 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.sharmadhiraj.mycurrencyexchange.data.repository.ExchangeRatesRepositoryImpl
 import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchException
 import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import com.sharmadhiraj.mycurrencyexchange.util.CommonUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -28,9 +30,13 @@ class CurrencyConverterViewModel @Inject constructor(private val repository: Exc
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val rates = repository.getExchangeRates()
-                _viewState.postValue(ConverterViewState.Success(rates))
+                withContext(Dispatchers.Main) {
+                    _viewState.value = ConverterViewState.Success(rates)
+                }
             } catch (e: ExchangeRatesFetchException) {
-                _viewState.postValue(ConverterViewState.Error(e.message ?: "Unknown error"))
+                withContext(Dispatchers.Main) {
+                    _viewState.value = ConverterViewState.Error(e.message ?: "Unknown error")
+                }
             }
         }
     }
@@ -38,10 +44,8 @@ class CurrencyConverterViewModel @Inject constructor(private val repository: Exc
     fun convertCurrency(amount: Double, selectedCurrency: String) {
         val exchangeRates = (_viewState.value as? ConverterViewState.Success)?.exchangeRates?.rates
         if (exchangeRates != null) {
-            val convertedAmounts = exchangeRates.mapValues { (_, rate) ->
-                amount * rate / exchangeRates[selectedCurrency]!!
-            }
-            _convertedAmounts.value = convertedAmounts
+            _convertedAmounts.value =
+                CommonUtil.convertCurrency(amount, selectedCurrency, exchangeRates)
         }
     }
 }

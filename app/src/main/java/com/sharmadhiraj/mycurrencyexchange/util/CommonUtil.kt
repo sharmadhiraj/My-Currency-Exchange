@@ -22,4 +22,14 @@ object CommonUtil {
             0.0
         }
     }
+
+    fun convertCurrency(
+        amount: Double,
+        selectedCurrency: String,
+        exchangeRates: Map<String, Double>
+    ): Map<String, Double> {
+        return exchangeRates.mapValues { (_, rate) ->
+            amount * rate / exchangeRates[selectedCurrency]!!
+        }
+    }
 }
