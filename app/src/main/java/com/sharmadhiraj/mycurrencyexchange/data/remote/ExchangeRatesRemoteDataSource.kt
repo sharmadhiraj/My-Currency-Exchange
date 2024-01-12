@@ -17,7 +17,7 @@ class ExchangeRatesRemoteDataSource @Inject constructor(private val apiService: 
             if (response.isSuccessful) {
                 val exchangeRatesApiResponse = response.body()
                 if (exchangeRatesApiResponse?.base == null || exchangeRatesApiResponse.timestamp == null || exchangeRatesApiResponse.rates.isNullOrEmpty()) {
-                    throw ApiException("Response does not have required data.")
+                    throw ApiException("Response null or empty")
                 } else {
                     return ExchangeRates(
                         base = exchangeRatesApiResponse.base,
@@ -26,10 +26,10 @@ class ExchangeRatesRemoteDataSource @Inject constructor(private val apiService: 
                     )
                 }
             } else {
-                throw ApiException("API error: ${response.code()}")
+                throw ApiException("Unsuccessful response status code ${response.code()}")
             }
         } catch (e: Exception) {
-            throw ApiException("Network error: ${e.message}", e)
+            throw ApiException("API error: ${e.message}", e)
         }
     }
 }

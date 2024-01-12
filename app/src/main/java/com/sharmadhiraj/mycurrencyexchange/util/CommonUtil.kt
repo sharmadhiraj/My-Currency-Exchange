@@ -2,6 +2,7 @@ package com.sharmadhiraj.mycurrencyexchange.util
 
 import android.util.Log
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 object CommonUtil {
@@ -31,5 +32,10 @@ object CommonUtil {
         return exchangeRates.mapValues { (_, rate) ->
             amount * rate / exchangeRates[selectedCurrency]!!
         }
+    }
+
+    fun isExpiredData(updatedAt: Date): Boolean {
+        val thirtyMinutesAgo = Date(Date().time - 30 * 60 * 1000)
+        return updatedAt.before(thirtyMinutesAgo)
     }
 }

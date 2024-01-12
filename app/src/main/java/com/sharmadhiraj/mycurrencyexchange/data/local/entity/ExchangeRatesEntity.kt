@@ -15,4 +15,5 @@ data class ExchangeRatesEntity(
     @ColumnInfo(name = "updated_at")
     @SerializedName(value = "updated_at")
     val updatedAt: Date = Date(System.currentTimeMillis())
+
 )

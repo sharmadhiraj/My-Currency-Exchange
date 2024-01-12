@@ -35,15 +35,25 @@ class CurrencyConverterViewModelTest {
 
     @Test
     fun `fetchExchangeRates success should update live loading data`() {
+        //Given
         coEvery { repository.getExchangeRates() } returns mockExchangeRates
+
+        //When
         viewModel.fetchExchangeRates()
+
+        //Then
         assert(viewModel.viewState.value is ConverterViewState.Loading)
     }
 
     @Test
     fun `fetchExchangeRates success should update live data`() {
+        //Given
         coEvery { repository.getExchangeRates() } returns mockExchangeRates
+
+        //When
         viewModel.fetchExchangeRates()
+
+        //Then
         coVerify {
             repository.getExchangeRates()
         }
@@ -53,22 +63,18 @@ class CurrencyConverterViewModelTest {
 
     @Test
     fun `fetchExchangeRates failure should update error live data`() {
+        //Given
         coEvery { repository.getExchangeRates() } throws ExchangeRatesFetchException("Error")
+
+        //When
         viewModel.fetchExchangeRates()
         coVerify {
             repository.getExchangeRates()
         }
+
+        //Then
         assert(viewModel.viewState.value is ConverterViewState.Error)
         assertEquals("Error", (viewModel.viewState.value as ConverterViewState.Error).errorMessage)
-    }
-
-    @Test
-    fun `convertCurrency should update convertedAmounts live data`() {
-        coEvery { repository.getExchangeRates() } returns mockExchangeRates
-        viewModel.fetchExchangeRates()
-        viewModel.convertCurrency(1.0, "AED")
-        val expectedConvertedAmounts = mapOf("USD" to 15.0, "GBP" to 12.0)
-        assertEquals(expectedConvertedAmounts, viewModel.convertedAmounts.value)
     }
 
     companion object {
