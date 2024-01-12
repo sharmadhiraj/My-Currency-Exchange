@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import com.sharmadhiraj.mycurrencyexchange.R
 import com.sharmadhiraj.mycurrencyexchange.databinding.ActivityConverterBinding
+import com.sharmadhiraj.mycurrencyexchange.util.CommonUtil
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -39,12 +40,21 @@ class ConverterActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        viewModel.exchangeRates.observe(
+        viewModel.viewState.observe(
             this
-        ) { exchangeRates ->
-            exchangeRateSpinnerAdapter.clear()
-            exchangeRateSpinnerAdapter.addAll(exchangeRates.rates.keys)
-            exchangeRateSpinnerAdapter.notifyDataSetChanged()
+        ) { viewState ->
+            if (viewState is ConverterViewState.Success) {
+                exchangeRateSpinnerAdapter.clear()
+                exchangeRateSpinnerAdapter.addAll(viewState.exchangeRates.rates.keys)
+                exchangeRateSpinnerAdapter.notifyDataSetChanged()
+                binding.textLastRefreshed.text =
+                    getString(
+                        R.string.exchange_rate_of,
+                        CommonUtil.formatDateTime(viewState.exchangeRates.timestamp)
+                    )
+            } else if (viewState is ConverterViewState.Error) {
+                binding.txtErrorMessage.text = viewState.errorMessage
+            }
         }
 
         viewModel.convertedAmounts.observe(
@@ -97,17 +107,9 @@ class ConverterActivity : AppCompatActivity() {
     }
 
     private fun convertCurrency() {
-        val amount: Double = getAmount()
+        val amount: Double = CommonUtil.stringToDouble(binding.editTextAmount.text.toString())
         if (amount == 0.0) return
         viewModel.convertCurrency(amount, binding.spinnerCurrency.selectedItem.toString())
-    }
-
-    private fun getAmount(): Double {
-        return try {
-            binding.editTextAmount.text.toString().toDouble()
-        } catch (e: Exception) {
-            0.0
-        }
     }
 
 }

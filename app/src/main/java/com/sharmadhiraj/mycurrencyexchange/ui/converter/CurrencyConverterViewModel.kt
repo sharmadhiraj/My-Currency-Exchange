@@ -17,36 +17,26 @@ import javax.inject.Inject
 class CurrencyConverterViewModel @Inject constructor(private val repository: ExchangeRatesRepositoryImpl) :
     ViewModel() {
 
-    private val _exchangeRates = MutableLiveData<ExchangeRates>()
-    val exchangeRates: LiveData<ExchangeRates> get() = _exchangeRates
-
-    private val _error = MutableLiveData<String?>()
-    val error: LiveData<String?> get() = _error
-
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> get() = _isLoading
+    private val _viewState = MutableLiveData<ConverterViewState>()
+    val viewState: LiveData<ConverterViewState> get() = _viewState
 
     private val _convertedAmounts = MutableLiveData<Map<String, Double>>()
     val convertedAmounts: LiveData<Map<String, Double>> get() = _convertedAmounts
 
-
     fun fetchExchangeRates() {
-        _isLoading.value = true
-        _error.value = null
+        _viewState.value = ConverterViewState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val rates = repository.getExchangeRates()
-                _exchangeRates.postValue(rates)
+                _viewState.postValue(ConverterViewState.Success(rates))
             } catch (e: ExchangeRatesFetchException) {
-                _error.postValue(e.message)
-            } finally {
-                _isLoading.postValue(false)
+                _viewState.postValue(ConverterViewState.Error(e.message ?: "Unknown error"))
             }
         }
     }
 
     fun convertCurrency(amount: Double, selectedCurrency: String) {
-        val exchangeRates = _exchangeRates.value?.rates
+        val exchangeRates = (_viewState.value as? ConverterViewState.Success)?.exchangeRates?.rates
         if (exchangeRates != null) {
             val convertedAmounts = exchangeRates.mapValues { (_, rate) ->
                 amount * rate / exchangeRates[selectedCurrency]!!
@@ -54,6 +44,10 @@ class CurrencyConverterViewModel @Inject constructor(private val repository: Exc
             _convertedAmounts.value = convertedAmounts
         }
     }
+}
 
-
+sealed class ConverterViewState {
+    data object Loading : ConverterViewState()
+    data class Success(val exchangeRates: ExchangeRates) : ConverterViewState()
+    data class Error(val errorMessage: String) : ConverterViewState()
 }

@@ -8,6 +8,7 @@ import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchEx
 import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
 import com.sharmadhiraj.mycurrencyexchange.domain.repository.ExchangeRatesRepository
 import dagger.hilt.android.scopes.ViewModelScoped
+import java.util.Date
 import javax.inject.Inject
 
 @ViewModelScoped
@@ -20,7 +21,7 @@ class ExchangeRatesRepositoryImpl @Inject constructor(
         val localData: ExchangeRatesEntity? =
             localDataSource.getExchangeRates()
         try {
-            return if (localData != null && isDataStale(localData.timestamp)) {
+            return if (localData != null && !isDataStale(localData.updatedAt)) {
                 mapExchangeRatesEntityToDomain(localData)
             } else {
                 val remoteData: ExchangeRates = remoteDataSource.getExchangeRates()
@@ -31,18 +32,13 @@ class ExchangeRatesRepositoryImpl @Inject constructor(
             if (localData != null) {
                 mapExchangeRatesEntityToDomain(localData)
             }
-            throw ExchangeRatesFetchException(e.message ?: "Error fetching exchange rates", e.cause)
+            throw ExchangeRatesFetchException(e.message ?: "Unknown error", e.cause)
         }
     }
 
-    private fun isDataStale(timestamp: Long?): Boolean {
-        if (timestamp == null) {
-            return true
-        }
-        val currentTime = System.currentTimeMillis()
-        val dataAge = currentTime - timestamp
-        val staleThreshold = 30 * 60 * 1000 //30 minutes
-        return dataAge > staleThreshold
+    private fun isDataStale(updatedAt: Date): Boolean {
+        val thirtyMinutesAgo = Date(Date().time - 30 * 60 * 1000)
+        return updatedAt.before(thirtyMinutesAgo)
     }
 
     private fun mapExchangeRatesEntityToDomain(entity: ExchangeRatesEntity): ExchangeRates {

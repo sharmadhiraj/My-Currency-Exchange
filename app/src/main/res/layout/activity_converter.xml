@@ -8,6 +8,8 @@
 
         <import type="android.view.View" />
 
+        <import type="com.sharmadhiraj.mycurrencyexchange.ui.converter.ConverterViewState" />
+
         <variable
             name="viewModel"
             type="com.sharmadhiraj.mycurrencyexchange.ui.converter.CurrencyConverterViewModel" />
@@ -27,7 +29,7 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="@{viewModel.isLoading || viewModel.error!=null? View.GONE : View.VISIBLE}">
+            android:visibility="@{viewModel.viewState instanceof ConverterViewState.Success ? View.VISIBLE : View.GONE}">
 
             <LinearLayout
                 android:id="@+id/input"
@@ -67,12 +69,21 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/textLastRefreshed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/input"
+                android:layout_marginTop="8dp"
+                tools:text="Last refreshed on " />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewCurrencies"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/input"
+                android:layout_below="@+id/textLastRefreshed"
                 android:layout_marginTop="16dp" />
+
 
         </RelativeLayout>
 
@@ -81,15 +92,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="@{viewModel.isLoading? View.VISIBLE : View.GONE}" />
+            android:visibility="@{viewModel.viewState instanceof ConverterViewState.Loading ? View.VISIBLE : View.GONE}" />
 
         <TextView
             android:id="@+id/txtErrorMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@{viewModel.error}"
-            android:visibility="@{viewModel.error==null ? View.GONE : View.VISIBLE}"
+            android:visibility="@{viewModel.viewState instanceof ConverterViewState.Error ? View.VISIBLE : View.GONE}"
             tools:text="Something went wrong!" />
 
     </RelativeLayout>
