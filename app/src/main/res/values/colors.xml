@@ -8,9 +8,8 @@
     <color name="currency_secondary_variant">#388E3C</color>
     <color name="currency_on_secondary">#000000</color>
 
-    <color name="border_color">#A9A9A9</color>
+    <color name="border_color">#AAAAAA</color>
     <color name="edit_text_text_color">#000000</color>
-    <color name="spinner_dropdown_selector">#000000</color>
 
 
 </resources>

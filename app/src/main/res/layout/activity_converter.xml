@@ -1,48 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp"
-    tools:context=".ui.converter.ConverterActivity">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
-        android:id="@+id/input"
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.sharmadhiraj.mycurrencyexchange.ui.converter.CurrencyConverterViewModel" />
+    </data>
+
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="16dp"
+        tools:context=".ui.converter.ConverterActivity">
 
-        <EditText
-            android:id="@+id/editTextAmount"
-            style="@style/EditTextStyle"
-            android:layout_width="0dp"
+        <RelativeLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="@{viewModel.isLoading || viewModel.error!=null? View.GONE : View.VISIBLE}">
+
+            <LinearLayout
+                android:id="@+id/input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editTextAmount"
+                    style="@style/EditTextStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/enter_amount"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:padding="8dp"
+                    android:text="1" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="4dp"
+                    app:strokeColor="@color/border_color"
+                    app:strokeWidth="1dp">
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/spinnerCurrency"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="9dp"
+                        android:prompt="@string/select_currency"
+                        android:spinnerMode="dialog" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewCurrencies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/input"
+                android:layout_marginTop="16dp" />
+
+        </RelativeLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="7"
-            android:hint="@string/enter_amount"
-            android:importantForAutofill="no"
-            android:inputType="numberDecimal"
-            android:padding="8dp" />
+            android:layout_centerInParent="true"
+            android:visibility="@{viewModel.isLoading? View.VISIBLE : View.GONE}" />
 
-        <Spinner
-            android:id="@+id/spinnerCurrency"
-            style="@style/SpinnerStyle"
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/txtErrorMessage"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_weight="3"
-            android:prompt="@string/select_currency" />
+            android:layout_centerInParent="true"
+            android:text="@{viewModel.error}"
+            android:visibility="@{viewModel.error==null ? View.GONE : View.VISIBLE}"
+            tools:text="Something went wrong!" />
 
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewCurrencies"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/input"
-        android:layout_marginTop="16dp" />
-
-</RelativeLayout>
+    </RelativeLayout>
+</layout>

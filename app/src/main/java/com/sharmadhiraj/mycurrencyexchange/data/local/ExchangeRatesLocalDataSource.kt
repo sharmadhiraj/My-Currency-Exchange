@@ -2,8 +2,9 @@ package com.sharmadhiraj.mycurrencyexchange.data.local
 
 import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRatesDao
 import com.sharmadhiraj.mycurrencyexchange.data.local.entity.ExchangeRatesEntity
+import javax.inject.Inject
 
-class ExchangeRatesLocalDataSource(private val exchangeRatesDao: ExchangeRatesDao) {
+class ExchangeRatesLocalDataSource @Inject constructor(private val exchangeRatesDao: ExchangeRatesDao) {
 
     suspend fun getExchangeRates(): ExchangeRatesEntity? {
         return exchangeRatesDao.getExchangeRates()

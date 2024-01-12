@@ -4,8 +4,10 @@ import com.sharmadhiraj.mycurrencyexchange.BuildConfig
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiException
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiService
 import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import javax.inject.Inject
 
-class ExchangeRatesRemoteDataSource(private val apiService: ApiService) {
+
+class ExchangeRatesRemoteDataSource @Inject constructor(private val apiService: ApiService) {
 
     suspend fun getExchangeRates(): ExchangeRates {
         try {
@@ -14,7 +16,7 @@ class ExchangeRatesRemoteDataSource(private val apiService: ApiService) {
 
             if (response.isSuccessful) {
                 val exchangeRatesApiResponse = response.body()
-                if (exchangeRatesApiResponse?.base == null || exchangeRatesApiResponse.timestamp == null || exchangeRatesApiResponse.rates == null) {
+                if (exchangeRatesApiResponse?.base == null || exchangeRatesApiResponse.timestamp == null || exchangeRatesApiResponse.rates.isNullOrEmpty()) {
                     throw ApiException("Response does not have required data.")
                 } else {
                     return ExchangeRates(
