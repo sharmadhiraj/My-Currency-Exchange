@@ -3,11 +3,13 @@ package com.sharmadhiraj.mycurrencyexchange.data.local
 
 import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRatesDao
 import com.sharmadhiraj.mycurrencyexchange.data.local.entity.ExchangeRatesEntity
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Test
 
 class ExchangeRatesLocalDataSourceTest {
@@ -51,6 +53,11 @@ class ExchangeRatesLocalDataSourceTest {
         assertEquals(exchangeRatesEntity.base, retrievedEntity!!.base)
         assertEquals(exchangeRatesEntity.timestamp, retrievedEntity.timestamp)
         assertEquals(exchangeRatesEntity.rates, retrievedEntity.rates)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
     }
 
     private fun createExchangeRatesEntity(): ExchangeRatesEntity {

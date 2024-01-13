@@ -6,11 +6,13 @@ import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchEx
 import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
 import com.sharmadhiraj.mycurrencyexchange.helpers.MainDispatcherRule
 import com.sharmadhiraj.mycurrencyexchange.ui.converter.ConverterViewState.Success
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -75,6 +77,12 @@ class CurrencyConverterViewModelTest {
         //Then
         assert(viewModel.viewState.value is ConverterViewState.Error)
         assertEquals("Error", (viewModel.viewState.value as ConverterViewState.Error).errorMessage)
+    }
+
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
     }
 
     companion object {

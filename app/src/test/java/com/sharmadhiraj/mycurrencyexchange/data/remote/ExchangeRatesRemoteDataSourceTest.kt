@@ -4,11 +4,13 @@ import com.sharmadhiraj.mycurrencyexchange.data.model.ExchangeRatesApiResponse
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiException
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiService
 import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
+import org.junit.After
 import org.junit.Test
 import retrofit2.Response
 
@@ -108,5 +110,10 @@ class ExchangeRatesRemoteDataSourceTest {
         // Then
         assert(exception is ApiException)
         assertEquals("API error: Network error", exception?.message)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
     }
 }

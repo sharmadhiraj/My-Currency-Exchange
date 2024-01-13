@@ -30,7 +30,7 @@ class ExchangeRatesRepositoryImpl @Inject constructor(
             }
         } catch (e: ApiException) {
             if (localData != null) {
-                Mapper.mapExchangeRatesEntityToDomain(localData)
+                return Mapper.mapExchangeRatesEntityToDomain(localData)
             }
             throw ExchangeRatesFetchException(e.message ?: "Unknown error", e.cause)
         }

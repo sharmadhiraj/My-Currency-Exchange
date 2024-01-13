@@ -1,6 +1,8 @@
 package com.sharmadhiraj.mycurrencyexchange.data.local
 
 import com.google.gson.Gson
+import io.mockk.clearAllMocks
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.Date
@@ -59,5 +61,10 @@ class ConvertersTest {
         // Then
         val expectedTimestamp = date.time
         assertEquals(expectedTimestamp, result)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
     }
 }
