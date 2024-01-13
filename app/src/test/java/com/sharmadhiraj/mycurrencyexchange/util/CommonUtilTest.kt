@@ -1,17 +1,23 @@
 package com.sharmadhiraj.mycurrencyexchange.util
 
+
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
+import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 class CommonUtilTest {
+
+    @Before
+    fun setUp() {
+        MockKAnnotations.init(this)
+    }
 
     @Test
     fun `formatDateTime should format timestamp correctly`() {
@@ -52,59 +58,51 @@ class CommonUtilTest {
     }
 
     @Test
-    fun `convertCurrency should convert currency correctly #1`() {
+    fun `convertCurrencies should convert currency correctly #1`() {
         // Given
         val amount = 10.0
         val selectedCurrency = "EUR"
-        val exchangeRates = mapOf("USD" to 1.5, "GBP" to 1.2, "EUR" to 1.0)
+        val exchangeRates = listOf(
+            Currency("USD", "United States Dollar", 1.5),
+            Currency("GBP", "British Pound Sterling", 1.2),
+            Currency("EUR", "Euro", 1.0)
+        )
 
         // When
-        val convertedAmounts = CommonUtil.convertCurrency(amount, selectedCurrency, exchangeRates)
+        val convertedCurrencies =
+            CommonUtil.convertCurrencies(amount, selectedCurrency, exchangeRates)
 
         // Then
-        val expectedConvertedAmounts = mapOf("USD" to 15.0, "GBP" to 12.0, "EUR" to 10.0)
-        assertEquals(expectedConvertedAmounts, convertedAmounts)
+        val expectedConvertedCurrencies = listOf(
+            Currency("USD", "United States Dollar", 15.0),
+            Currency("GBP", "British Pound Sterling", 12.0),
+            Currency("EUR", "Euro", 10.0)
+        )
+        assertEquals(expectedConvertedCurrencies, convertedCurrencies)
     }
 
     @Test
-    fun `convertCurrency should convert currency correctly #2`() {
+    fun `convertCurrencies should convert currency correctly #2`() {
         // Given
         val amount = 145.50
         val selectedCurrency = "EUR"
-        val exchangeRates = mapOf("USD" to 1.5, "GBP" to 1.2, "EUR" to 1.0)
+        val exchangeRates = listOf(
+            Currency("USD", "United States Dollar", 1.5),
+            Currency("GBP", "British Pound Sterling", 1.2),
+            Currency("EUR", "Euro", 1.0)
+        )
 
         // When
-        val convertedAmounts = CommonUtil.convertCurrency(amount, selectedCurrency, exchangeRates)
+        val convertedCurrencies =
+            CommonUtil.convertCurrencies(amount, selectedCurrency, exchangeRates)
 
         // Then
-        val expectedConvertedAmounts = mapOf("USD" to 218.25, "GBP" to 174.6, "EUR" to 145.5)
-        assertEquals(expectedConvertedAmounts, convertedAmounts)
-    }
-
-    @Test
-    fun `isExpiredData should return false for recent date`() {
-        // Given
-        val updatedAt = Date()
-
-        // When
-        val result = CommonUtil.isExpiredData(updatedAt)
-
-        // Then
-        assertFalse(result)
-    }
-
-    @Test
-    fun `isExpiredData should return true for date more than 30 minutes ago`() {
-        // Given
-        val thirtyMinutesAgo = Date(Date().time - 30 * 60 * 1000)
-        val updatedAt =
-            Date(thirtyMinutesAgo.time - 1000) // Subtracting 1 second to make it more than 30 minutes
-
-        // When
-        val result = CommonUtil.isExpiredData(updatedAt)
-
-        // Then
-        assertTrue(result)
+        val expectedConvertedCurrencies = listOf(
+            Currency("USD", "United States Dollar", 218.25),
+            Currency("GBP", "British Pound Sterling", 174.6),
+            Currency("EUR", "Euro", 145.5)
+        )
+        assertEquals(expectedConvertedCurrencies, convertedCurrencies)
     }
 
     @After

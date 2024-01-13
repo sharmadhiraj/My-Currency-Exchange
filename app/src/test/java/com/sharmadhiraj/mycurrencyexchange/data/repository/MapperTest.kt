@@ -11,31 +11,41 @@ import org.junit.Test
 class MapperTest {
 
     @Test
-    fun `mapExchangeRatesEntityToDomain should map correctly`() {
+    fun `mapCurrencyEntityToDomain should map List of CurrencyEntity to List of Currency`() {
         // Given
-        val entity = CurrencyEntity("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
+        val currencyEntities = listOf(
+            CurrencyEntity("USD", "United States Dollar", 1.0),
+            CurrencyEntity("EUR", "Euro", 1.5)
+        )
 
         // When
-        val domain = Mapper.mapExchangeRatesEntityToDomain(entity)
+        val result = Mapper.mapCurrencyEntityToDomain(currencyEntities)
 
         // Then
-        assertEquals(entity.base, domain.base)
-        assertEquals(entity.timestamp, domain.timestamp)
-        assertEquals(entity.rates, domain.rates)
+        val expected = listOf(
+            Currency("USD", "United States Dollar", 1.0),
+            Currency("EUR", "Euro", 1.5)
+        )
+        assertEquals(expected, result)
     }
 
     @Test
-    fun `mapExchangeRatesDomainToEntity should map correctly`() {
+    fun `mapCurrencyDomainToEntity should map List of Currency to List of CurrencyEntity`() {
         // Given
-        val domain = Currency("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
+        val currencies = listOf(
+            Currency("USD", "United States Dollar", 1.0),
+            Currency("EUR", "Euro", 1.5)
+        )
 
         // When
-        val entity = Mapper.mapExchangeRatesDomainToEntity(domain)
+        val result = Mapper.mapCurrencyDomainToEntity(currencies)
 
         // Then
-        assertEquals(domain.base, entity.base)
-        assertEquals(domain.timestamp, entity.timestamp)
-        assertEquals(domain.rates, entity.rates)
+        val expected = listOf(
+            CurrencyEntity("USD", "United States Dollar", 1.0),
+            CurrencyEntity("EUR", "Euro", 1.5)
+        )
+        assertEquals(expected, result)
     }
 
     @After

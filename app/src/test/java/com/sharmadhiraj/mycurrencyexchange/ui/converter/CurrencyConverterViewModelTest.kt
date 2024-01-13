@@ -67,7 +67,7 @@ class CurrencyConverterViewModelTest {
             repository.getCurrencies()
         }
         assert(viewModel.viewState.value is Success)
-        assertEquals(mockCurrency, (viewModel.viewState.value as Success).currency)
+        assertEquals(mockCurrency, (viewModel.viewState.value as Success).currencies)
     }
 
     @Test
@@ -95,12 +95,12 @@ class CurrencyConverterViewModelTest {
     }
 
     companion object {
-        private val mockCurrency =
+        private val mockCurrency = listOf(
             Currency(
                 "USD",
-                1705024800, mapOf(
-                    "EUR" to 1.5, "GBP" to 1.2
-                )
+                "United States Dollar",
+                1.10
             )
+        )
     }
 }

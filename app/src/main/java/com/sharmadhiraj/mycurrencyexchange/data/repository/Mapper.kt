@@ -4,11 +4,11 @@ import com.sharmadhiraj.mycurrencyexchange.data.local.entity.CurrencyEntity
 import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 
 object Mapper {
-    fun mapExchangeRatesEntityToDomain(entity: CurrencyEntity): Currency {
-        return Currency(entity.code, entity.name, entity.rate)
+    fun mapCurrencyEntityToDomain(currencyEntities: List<CurrencyEntity>): List<Currency> {
+        return currencyEntities.map { entity -> Currency(entity.code, entity.name, entity.rate) }
     }
 
-    fun mapExchangeRatesDomainToEntity(domain: Currency): CurrencyEntity {
-        return CurrencyEntity(domain.code, domain.name, domain.rate)
+    fun mapCurrencyDomainToEntity(currencies: List<Currency>): List<CurrencyEntity> {
+        return currencies.map { domain -> CurrencyEntity(domain.code, domain.name, domain.rate) }
     }
 }

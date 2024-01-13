@@ -1,8 +1,8 @@
 package com.sharmadhiraj.mycurrencyexchange.data.repository
 
-import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRateDao
+import com.sharmadhiraj.mycurrencyexchange.data.local.CurrenciesLocalDataSource
+import com.sharmadhiraj.mycurrencyexchange.data.local.dao.CurrencyDao
 import com.sharmadhiraj.mycurrencyexchange.data.local.entity.CurrencyEntity
-import com.sharmadhiraj.mycurrencyexchange.data.local.source.ExchangeRatesLocalDataSource
 import com.sharmadhiraj.mycurrencyexchange.data.remote.CurrenciesRemoteDataSource
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiException
 import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchException
@@ -18,83 +18,89 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
-import java.util.Date
 
 class CurrenciesRepositoryImplTest {
 
     private lateinit var repository: CurrenciesRepositoryImpl
     private lateinit var remoteDataSource: CurrenciesRemoteDataSource
-    private lateinit var localDataSource: ExchangeRatesLocalDataSource
-    private val exchangeRatesDao: ExchangeRateDao = mockk()
+    private lateinit var localDataSource: CurrenciesLocalDataSource
+    private lateinit var exchangeDataPreferences: ExchangeDataCacheValidator
+    private val currencyDao: CurrencyDao = mockk()
 
     @Before
     fun setup() {
         remoteDataSource = mockk()
-        localDataSource = ExchangeRatesLocalDataSource(exchangeRatesDao)
-        repository = CurrenciesRepositoryImpl(remoteDataSource, localDataSource)
+        exchangeDataPreferences = mockk()
+        localDataSource = CurrenciesLocalDataSource(currencyDao)
+        repository =
+            CurrenciesRepositoryImpl(remoteDataSource, localDataSource, exchangeDataPreferences)
     }
 
     @Test
-    fun `getExchangeRates - when local data is not expired - should return local data`() {
+    fun `getCurrencies - when local data is not expired - should return local data`() {
         // Given
-        val localData = createMockExchangeRatesEntity(isExpired = false)
-        coEvery { localDataSource.getExchangeRates() } returns localData
+        val localData = createMockCurrencyEntities()
+        coEvery { localDataSource.getCurrencies() } returns localData
+        coEvery { exchangeDataPreferences.isCacheValid() } returns true
 
         // When
         val result = runBlocking { repository.getCurrencies() }
 
         // Then
-        coVerify(inverse = true) { remoteDataSource.getExchangeRates() }
-        assertEquals(localData.timestamp, result.timestamp)
+        coVerify(inverse = true) { remoteDataSource.getCurrencies() }
+        assertEquals(Mapper.mapCurrencyEntityToDomain(localData), result)
     }
 
     @Test
-    fun `getExchangeRates - when local data is expired - should return remote data and save to local`() {
+    fun `getCurrencies - when local data is expired - should return remote data and save to local`() {
         // Given
-        val localData = createMockExchangeRatesEntity(isExpired = true)
-        val remoteData = createMockExchangeRates()
-        coEvery { exchangeRatesDao.saveExchangeRates(any()) } returns Unit
-        coEvery { localDataSource.getExchangeRates() } returns localData
-        coEvery { remoteDataSource.getExchangeRates() } returns remoteData
+        val localData = createMockCurrencyEntities()
+        val remoteData = createCurrencies()
+        coEvery { currencyDao.saveCurrencies(any()) } returns Unit
+        coEvery { localDataSource.getCurrencies() } returns localData
+        coEvery { remoteDataSource.getCurrencies() } returns remoteData
+        coEvery { exchangeDataPreferences.updateLastRefreshTime() } returns Unit
+        coEvery { exchangeDataPreferences.isCacheValid() } returns false
 
         // When
         val result = runBlocking { repository.getCurrencies() }
 
         // Then
-        coVerify { remoteDataSource.getExchangeRates() }
-        coVerify { exchangeRatesDao.saveExchangeRates(any()) }
-        assertNotEquals(localData.timestamp, result.timestamp)
+        coVerify { remoteDataSource.getCurrencies() }
+        coVerify { currencyDao.saveCurrencies(any()) }
+        assertNotEquals(Mapper.mapCurrencyEntityToDomain(localData), result)
     }
 
     @Test
-    fun `getExchangeRates - when remote data fail and local data is available (expired) - should return local data`() {
+    fun `getCurrencies - when remote data fail and local data is available (expired) - should return local data`() {
         // Given
-        val localData = createMockExchangeRatesEntity(isExpired = true)
-        coEvery { localDataSource.getExchangeRates() } returns localData
-        coEvery { remoteDataSource.getExchangeRates() } throws ApiException("Error")
+        val localData = createMockCurrencyEntities()
+        coEvery { localDataSource.getCurrencies() } returns localData
+        coEvery { remoteDataSource.getCurrencies() } throws ApiException("Error")
+        coEvery { exchangeDataPreferences.isCacheValid() } returns false
 
         // When
         val result = runBlocking { repository.getCurrencies() }
 
         // Then
-        coVerify { remoteDataSource.getExchangeRates() }
-        coVerify { localDataSource.getExchangeRates() }
-        assertEquals(localData.timestamp, result.timestamp)
+        coVerify { remoteDataSource.getCurrencies() }
+        coVerify { localDataSource.getCurrencies() }
+        assertEquals(Mapper.mapCurrencyEntityToDomain(localData), result)
     }
 
     @Test(expected = ExchangeRatesFetchException::class)
-    fun `getExchangeRates - when both local and remote data fail - should throw exception`() {
+    fun `getCurrencies - when both local and remote data fail - should throw exception`() {
         // Given
-        coEvery { localDataSource.getExchangeRates() } returns null
-        coEvery { remoteDataSource.getExchangeRates() } throws ApiException("Error")
+        coEvery { localDataSource.getCurrencies() } returns null
+        coEvery { remoteDataSource.getCurrencies() } throws ApiException("Error")
 
         // When
         runBlocking { repository.getCurrencies() }
 
         // Then
         // Exception will be thrown, function annotation @Test(expected = ExchangeRatesFetchException::class)
-        coVerify { remoteDataSource.getExchangeRates() }
-        coVerify { localDataSource.getExchangeRates() }
+        coVerify { remoteDataSource.getCurrencies() }
+        coVerify { localDataSource.getCurrencies() }
     }
 
     @After
@@ -103,21 +109,24 @@ class CurrenciesRepositoryImplTest {
         unmockkAll()
     }
 
-    private fun createMockExchangeRatesEntity(isExpired: Boolean = false): CurrencyEntity {
-        return CurrencyEntity(
-            "USD",
-            System.currentTimeMillis() / 1000 - (if (isExpired) 31 * 60 else 0),
-            mapOf("EUR" to 1.5, "GBP" to 1.2),
-            updatedAt = Date(System.currentTimeMillis() - (if (isExpired) 31 * 60 * 1000 else 0))
+    private fun createMockCurrencyEntities(): List<CurrencyEntity> {
+        return listOf(
+            CurrencyEntity(
+                "USD",
+                "United States Dollar",
+                1.2
+            )
         )
     }
 
 
-    private fun createMockExchangeRates(): Currency {
-        return Currency(
-            "USD",
-            System.currentTimeMillis() / 1000,
-            mapOf("EUR" to 1.5, "GBP" to 1.2)
+    private fun createCurrencies(): List<Currency> {
+        return listOf(
+            Currency(
+                "USD",
+                "United States Dollar",
+                1.5
+            )
         )
     }
 }

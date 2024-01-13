@@ -1,4 +1,4 @@
-package com.sharmadhiraj.mycurrencyexchange.data.local.source
+package com.sharmadhiraj.mycurrencyexchange.data.local
 
 import com.sharmadhiraj.mycurrencyexchange.data.local.dao.CurrencyDao
 import com.sharmadhiraj.mycurrencyexchange.data.local.entity.CurrencyEntity

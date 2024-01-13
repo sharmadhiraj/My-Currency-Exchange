@@ -1,5 +1,6 @@
 package com.sharmadhiraj.mycurrencyexchange.data.remote.api
 
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -18,13 +19,17 @@ object ApiClient {
         retrofit.create(ApiService::class.java)
     }
 
-    suspend fun <T> fetchData(apiCall: suspend () -> T): T {
+    suspend fun <T> fetchData(apiCall: suspend () -> Response<T>?): T {
         try {
-            val response = apiCall.invoke()
-            if (response is Map<*, *> || response is List<*>) {
-                return response
+            val response: Response<T>? = apiCall.invoke()
+            if (response != null) {
+                if (response.isSuccessful) {
+                    return response.body() ?: throw ApiException("Response body is empty")
+                } else {
+                    throw ApiException("Unsuccessful response status code ${response.code()}")
+                }
             } else {
-                throw ApiException("Invalid response type")
+                throw ApiException("Response is null")
             }
         } catch (e: Exception) {
             throw ApiException("API error: ${e.message}", e)

@@ -13,6 +13,10 @@ Exchange Rates API to fetch the latest exchange rates.
 - **Technologies Used:** ViewModel, LiveData, Hilt, Room, Architecture Components, Clean
   Architecture, Repository Pattern, Retrofit, Coroutines.
 
+## Demo
+
+<img src=demo.gif height="600px" alt="My Currency Exchange - Demo"/>
+
 ## How It Works
 
 1. **ViewModel:** Manages UI-related data and communicates with the repository.
