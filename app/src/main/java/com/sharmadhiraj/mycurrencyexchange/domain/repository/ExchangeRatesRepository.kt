@@ -1,7 +1,7 @@
 package com.sharmadhiraj.mycurrencyexchange.domain.repository
 
-import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 
 interface ExchangeRatesRepository {
-    suspend fun getExchangeRates(): ExchangeRates
+    suspend fun getCurrencies(): List<Currency>
 }

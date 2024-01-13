@@ -1,7 +1,7 @@
 package com.sharmadhiraj.mycurrencyexchange.data.repository
 
-import com.sharmadhiraj.mycurrencyexchange.data.local.entity.ExchangeRatesEntity
-import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import com.sharmadhiraj.mycurrencyexchange.data.local.entity.CurrencyEntity
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 import io.mockk.clearAllMocks
 import io.mockk.unmockkAll
 import org.junit.After
@@ -13,7 +13,7 @@ class MapperTest {
     @Test
     fun `mapExchangeRatesEntityToDomain should map correctly`() {
         // Given
-        val entity = ExchangeRatesEntity("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
+        val entity = CurrencyEntity("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
 
         // When
         val domain = Mapper.mapExchangeRatesEntityToDomain(entity)
@@ -27,7 +27,7 @@ class MapperTest {
     @Test
     fun `mapExchangeRatesDomainToEntity should map correctly`() {
         // Given
-        val domain = ExchangeRates("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
+        val domain = Currency("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
 
         // When
         val entity = Mapper.mapExchangeRatesDomainToEntity(domain)

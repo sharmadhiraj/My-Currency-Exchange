@@ -4,7 +4,7 @@ package com.sharmadhiraj.mycurrencyexchange.di
 import android.content.Context
 import androidx.room.Room
 import com.sharmadhiraj.mycurrencyexchange.data.local.AppDatabase
-import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRatesDao
+import com.sharmadhiraj.mycurrencyexchange.data.local.dao.CurrencyDao
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiClient
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiService
 import dagger.Module
@@ -36,8 +36,8 @@ object AppModule {
 
 
     @Provides
-    fun provideExchangeRatesDao(database: AppDatabase): ExchangeRatesDao {
-        return database.exchangeRatesDao()
+    fun provideExchangeRatesDao(database: AppDatabase): CurrencyDao {
+        return database.currencyDao()
     }
 
 }

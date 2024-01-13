@@ -1,4 +1,4 @@
-package com.sharmadhiraj.mycurrencyexchange.data.model
+package com.sharmadhiraj.mycurrencyexchange.data.remote.model
 
 import com.google.gson.annotations.SerializedName
 

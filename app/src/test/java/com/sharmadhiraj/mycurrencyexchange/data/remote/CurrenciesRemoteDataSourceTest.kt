@@ -1,9 +1,9 @@
 package com.sharmadhiraj.mycurrencyexchange.data.remote
 
-import com.sharmadhiraj.mycurrencyexchange.data.model.ExchangeRatesApiResponse
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiException
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiService
-import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import com.sharmadhiraj.mycurrencyexchange.data.remote.model.ExchangeRatesApiResponse
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -15,10 +15,10 @@ import org.junit.After
 import org.junit.Test
 import retrofit2.Response
 
-class ExchangeRatesRemoteDataSourceTest {
+class CurrenciesRemoteDataSourceTest {
 
     private val apiService: ApiService = mockk()
-    private val remoteDataSource = ExchangeRatesRemoteDataSource(apiService)
+    private val remoteDataSource = CurrenciesRemoteDataSource(apiService)
 
     @Test
     fun `getExchangeRates returns ExchangeRates on successful API response`() = runBlocking {
@@ -39,7 +39,7 @@ class ExchangeRatesRemoteDataSourceTest {
 
         // Then
         assertEquals(
-            ExchangeRates(
+            Currency(
                 mockExchangeRates.base!!,
                 mockExchangeRates.timestamp!!,
                 mockExchangeRates.rates!!

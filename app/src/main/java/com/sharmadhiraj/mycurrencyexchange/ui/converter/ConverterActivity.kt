@@ -21,7 +21,7 @@ class ConverterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConverterBinding
     private val viewModel: CurrencyConverterViewModel by viewModels()
-    private val exchangeRateRecyclerViewAdapter = ExchangeRateAdapter()
+    private val exchangeRateRecyclerViewAdapter = CurrenciesAdapter()
     private lateinit var exchangeRateSpinnerAdapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,13 +45,8 @@ class ConverterActivity : AppCompatActivity() {
         ) { viewState ->
             if (viewState is ConverterViewState.Success) {
                 exchangeRateSpinnerAdapter.clear()
-                exchangeRateSpinnerAdapter.addAll(viewState.exchangeRates.rates.keys)
+                exchangeRateSpinnerAdapter.addAll(viewState.currencies.map { e -> e.fullName() })
                 exchangeRateSpinnerAdapter.notifyDataSetChanged()
-                binding.textLastRefreshed.text =
-                    getString(
-                        R.string.exchange_rate_of,
-                        CommonUtil.formatDateTime(viewState.exchangeRates.timestamp)
-                    )
             } else if (viewState is ConverterViewState.Error) {
                 binding.txtErrorMessage.text = viewState.errorMessage
             }
@@ -102,7 +97,7 @@ class ConverterActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        binding.recyclerViewCurrencies.layoutManager = GridLayoutManager(this, 3)
+        binding.recyclerViewCurrencies.layoutManager = GridLayoutManager(this, 2)
         binding.recyclerViewCurrencies.adapter = exchangeRateRecyclerViewAdapter
     }
 

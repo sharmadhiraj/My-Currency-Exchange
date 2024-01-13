@@ -6,14 +6,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.sharmadhiraj.mycurrencyexchange.R
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 import java.text.DecimalFormat
 
-class ExchangeRateAdapter : RecyclerView.Adapter<ExchangeRateAdapter.ViewHolder>() {
+class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
-    private var exchangeRates: List<Map.Entry<String, Double>> = emptyList()
+    private var currencies: List<Currency> = emptyList()
 
-    fun setExchangeRates(data: Map<String, Double>) {
-        exchangeRates = data.entries.toList()
+    fun setExchangeRates(updatedCurrencies: List<Currency>) {
+        currencies = updatedCurrencies
         notifyDataSetChanged()
     }
 
@@ -24,13 +25,12 @@ class ExchangeRateAdapter : RecyclerView.Adapter<ExchangeRateAdapter.ViewHolder>
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val (currencyCode, rate) = exchangeRates[position]
-
-        holder.textCurrencyCode.text = currencyCode
-        holder.textExchangeRate.text = DecimalFormat("#,##0.00").format(rate)
+        holder.textCurrencyCode.text = currencies[position].name
+        holder.textExchangeRate.text =
+            currencies[position].code + " " + DecimalFormat("#,##0.00").format(currencies[position].rate)
     }
 
-    override fun getItemCount(): Int = exchangeRates.size
+    override fun getItemCount(): Int = currencies.size
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textCurrencyCode: TextView = itemView.findViewById(R.id.textCurrencyCode)

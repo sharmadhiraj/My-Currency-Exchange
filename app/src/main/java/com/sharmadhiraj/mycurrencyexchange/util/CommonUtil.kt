@@ -1,6 +1,7 @@
 package com.sharmadhiraj.mycurrencyexchange.util
 
 import android.util.Log
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,14 +25,34 @@ object CommonUtil {
         }
     }
 
-    fun convertCurrency(
+    fun convertCurrencies(
         amount: Double,
         selectedCurrency: String,
-        exchangeRates: Map<String, Double>
-    ): Map<String, Double> {
-        return exchangeRates.mapValues { (_, rate) ->
-            amount * rate / exchangeRates[selectedCurrency]!!
+        exchangeRates: List<Currency>
+    ): List<Currency> {
+        val baseRateFromCurrency: Double = getBaseRateForCurrency(exchangeRates, selectedCurrency)
+        return exchangeRates.map { e ->
+            Currency(
+                e.code,
+                e.name,
+                convertCurrency(amount, baseRateFromCurrency, e.rate)
+            )
         }
+    }
+
+    private fun convertCurrency(
+        amount: Double,
+        baseRateFromCurrency: Double,
+        baseRateToCurrency: Double
+    ): Double {
+        return amount * baseRateToCurrency / baseRateFromCurrency
+    }
+
+    private fun getBaseRateForCurrency(
+        exchangeRates: List<Currency>,
+        selectedCurrency: String
+    ): Double {
+        return exchangeRates.firstOrNull { e -> e.fullName() == selectedCurrency }?.rate ?: 1.0
     }
 
     fun isExpiredData(updatedAt: Date): Boolean {

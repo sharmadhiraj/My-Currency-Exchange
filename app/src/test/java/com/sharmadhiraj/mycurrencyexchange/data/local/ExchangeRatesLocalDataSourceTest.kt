@@ -1,8 +1,9 @@
 package com.sharmadhiraj.mycurrencyexchange.data.local
 
 
-import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRatesDao
-import com.sharmadhiraj.mycurrencyexchange.data.local.entity.ExchangeRatesEntity
+import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRateDao
+import com.sharmadhiraj.mycurrencyexchange.data.local.entity.CurrencyEntity
+import com.sharmadhiraj.mycurrencyexchange.data.local.source.ExchangeRatesLocalDataSource
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -15,7 +16,7 @@ import org.junit.Test
 
 class ExchangeRatesLocalDataSourceTest {
 
-    private val exchangeRatesDao: ExchangeRatesDao = mockk()
+    private val exchangeRatesDao: ExchangeRateDao = mockk()
     private val localDataSource = ExchangeRatesLocalDataSource(exchangeRatesDao)
 
     @Test
@@ -62,7 +63,7 @@ class ExchangeRatesLocalDataSourceTest {
         unmockkAll()
     }
 
-    private fun createExchangeRatesEntity(): ExchangeRatesEntity {
-        return ExchangeRatesEntity("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
+    private fun createExchangeRatesEntity(): CurrencyEntity {
+        return CurrencyEntity("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
     }
 }

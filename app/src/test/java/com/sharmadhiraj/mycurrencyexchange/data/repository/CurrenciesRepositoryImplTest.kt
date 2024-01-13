@@ -1,12 +1,12 @@
 package com.sharmadhiraj.mycurrencyexchange.data.repository
 
-import com.sharmadhiraj.mycurrencyexchange.data.local.ExchangeRatesLocalDataSource
-import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRatesDao
-import com.sharmadhiraj.mycurrencyexchange.data.local.entity.ExchangeRatesEntity
-import com.sharmadhiraj.mycurrencyexchange.data.remote.ExchangeRatesRemoteDataSource
+import com.sharmadhiraj.mycurrencyexchange.data.local.dao.ExchangeRateDao
+import com.sharmadhiraj.mycurrencyexchange.data.local.entity.CurrencyEntity
+import com.sharmadhiraj.mycurrencyexchange.data.local.source.ExchangeRatesLocalDataSource
+import com.sharmadhiraj.mycurrencyexchange.data.remote.CurrenciesRemoteDataSource
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiException
 import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchException
-import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -20,18 +20,18 @@ import org.junit.Before
 import org.junit.Test
 import java.util.Date
 
-class ExchangeRatesRepositoryImplTest {
+class CurrenciesRepositoryImplTest {
 
-    private lateinit var repository: ExchangeRatesRepositoryImpl
-    private lateinit var remoteDataSource: ExchangeRatesRemoteDataSource
+    private lateinit var repository: CurrenciesRepositoryImpl
+    private lateinit var remoteDataSource: CurrenciesRemoteDataSource
     private lateinit var localDataSource: ExchangeRatesLocalDataSource
-    private val exchangeRatesDao: ExchangeRatesDao = mockk()
+    private val exchangeRatesDao: ExchangeRateDao = mockk()
 
     @Before
     fun setup() {
         remoteDataSource = mockk()
         localDataSource = ExchangeRatesLocalDataSource(exchangeRatesDao)
-        repository = ExchangeRatesRepositoryImpl(remoteDataSource, localDataSource)
+        repository = CurrenciesRepositoryImpl(remoteDataSource, localDataSource)
     }
 
     @Test
@@ -41,7 +41,7 @@ class ExchangeRatesRepositoryImplTest {
         coEvery { localDataSource.getExchangeRates() } returns localData
 
         // When
-        val result = runBlocking { repository.getExchangeRates() }
+        val result = runBlocking { repository.getCurrencies() }
 
         // Then
         coVerify(inverse = true) { remoteDataSource.getExchangeRates() }
@@ -58,7 +58,7 @@ class ExchangeRatesRepositoryImplTest {
         coEvery { remoteDataSource.getExchangeRates() } returns remoteData
 
         // When
-        val result = runBlocking { repository.getExchangeRates() }
+        val result = runBlocking { repository.getCurrencies() }
 
         // Then
         coVerify { remoteDataSource.getExchangeRates() }
@@ -74,7 +74,7 @@ class ExchangeRatesRepositoryImplTest {
         coEvery { remoteDataSource.getExchangeRates() } throws ApiException("Error")
 
         // When
-        val result = runBlocking { repository.getExchangeRates() }
+        val result = runBlocking { repository.getCurrencies() }
 
         // Then
         coVerify { remoteDataSource.getExchangeRates() }
@@ -89,7 +89,7 @@ class ExchangeRatesRepositoryImplTest {
         coEvery { remoteDataSource.getExchangeRates() } throws ApiException("Error")
 
         // When
-        runBlocking { repository.getExchangeRates() }
+        runBlocking { repository.getCurrencies() }
 
         // Then
         // Exception will be thrown, function annotation @Test(expected = ExchangeRatesFetchException::class)
@@ -103,8 +103,8 @@ class ExchangeRatesRepositoryImplTest {
         unmockkAll()
     }
 
-    private fun createMockExchangeRatesEntity(isExpired: Boolean = false): ExchangeRatesEntity {
-        return ExchangeRatesEntity(
+    private fun createMockExchangeRatesEntity(isExpired: Boolean = false): CurrencyEntity {
+        return CurrencyEntity(
             "USD",
             System.currentTimeMillis() / 1000 - (if (isExpired) 31 * 60 else 0),
             mapOf("EUR" to 1.5, "GBP" to 1.2),
@@ -113,8 +113,8 @@ class ExchangeRatesRepositoryImplTest {
     }
 
 
-    private fun createMockExchangeRates(): ExchangeRates {
-        return ExchangeRates(
+    private fun createMockExchangeRates(): Currency {
+        return Currency(
             "USD",
             System.currentTimeMillis() / 1000,
             mapOf("EUR" to 1.5, "GBP" to 1.2)

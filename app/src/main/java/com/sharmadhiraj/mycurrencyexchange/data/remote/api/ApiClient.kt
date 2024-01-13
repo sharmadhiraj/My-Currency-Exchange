@@ -17,4 +17,18 @@ object ApiClient {
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)
     }
+
+    suspend fun <T> fetchData(apiCall: suspend () -> T): T {
+        try {
+            val response = apiCall.invoke()
+            if (response is Map<*, *> || response is List<*>) {
+                return response
+            } else {
+                throw ApiException("Invalid response type")
+            }
+        } catch (e: Exception) {
+            throw ApiException("API error: ${e.message}", e)
+        }
+    }
+
 }

@@ -1,9 +1,9 @@
 package com.sharmadhiraj.mycurrencyexchange.ui.converter
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.sharmadhiraj.mycurrencyexchange.data.repository.ExchangeRatesRepositoryImpl
+import com.sharmadhiraj.mycurrencyexchange.data.repository.CurrenciesRepositoryImpl
 import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchException
-import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 import com.sharmadhiraj.mycurrencyexchange.helpers.MainDispatcherRule
 import com.sharmadhiraj.mycurrencyexchange.ui.converter.ConverterViewState.Success
 import io.mockk.clearAllMocks
@@ -25,7 +25,7 @@ import org.junit.Test
 class CurrencyConverterViewModelTest {
 
     private lateinit var viewModel: CurrencyConverterViewModel
-    private lateinit var repository: ExchangeRatesRepositoryImpl
+    private lateinit var repository: CurrenciesRepositoryImpl
     private val testDispatcher = StandardTestDispatcher()
     private val testCoroutineScope = TestScope(testDispatcher)
 
@@ -44,7 +44,7 @@ class CurrencyConverterViewModelTest {
     @Test
     fun `fetchExchangeRates success should update live loading data`() {
         //Given
-        coEvery { repository.getExchangeRates() } returns mockExchangeRates
+        coEvery { repository.getCurrencies() } returns mockCurrency
 
         //When
         viewModel.fetchExchangeRates()
@@ -56,7 +56,7 @@ class CurrencyConverterViewModelTest {
     @Test
     fun `fetchExchangeRates success should update live data`() {
         //Given
-        coEvery { repository.getExchangeRates() } returns mockExchangeRates
+        coEvery { repository.getCurrencies() } returns mockCurrency
 
         //When
         viewModel.fetchExchangeRates()
@@ -64,21 +64,21 @@ class CurrencyConverterViewModelTest {
         //Then
         testCoroutineScope.advanceUntilIdle()
         coVerify {
-            repository.getExchangeRates()
+            repository.getCurrencies()
         }
         assert(viewModel.viewState.value is Success)
-        assertEquals(mockExchangeRates, (viewModel.viewState.value as Success).exchangeRates)
+        assertEquals(mockCurrency, (viewModel.viewState.value as Success).currency)
     }
 
     @Test
     fun `fetchExchangeRates failure should update error live data`() {
         //Given
-        coEvery { repository.getExchangeRates() } throws ExchangeRatesFetchException("Error")
+        coEvery { repository.getCurrencies() } throws ExchangeRatesFetchException("Error")
 
         //When
         viewModel.fetchExchangeRates()
         coVerify {
-            repository.getExchangeRates()
+            repository.getCurrencies()
         }
 
         //Then
@@ -95,8 +95,8 @@ class CurrencyConverterViewModelTest {
     }
 
     companion object {
-        private val mockExchangeRates =
-            ExchangeRates(
+        private val mockCurrency =
+            Currency(
                 "USD",
                 1705024800, mapOf(
                     "EUR" to 1.5, "GBP" to 1.2

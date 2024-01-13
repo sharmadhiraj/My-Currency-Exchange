@@ -31,57 +31,44 @@
             android:layout_height="match_parent"
             android:visibility="@{viewModel.viewState instanceof ConverterViewState.Success ? View.VISIBLE : View.GONE}">
 
-            <LinearLayout
-                android:id="@+id/input"
+
+            <EditText
+                android:id="@+id/editTextAmount"
+                style="@style/EditTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:hint="@string/enter_amount"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:padding="8dp"
+                android:text="1" />
 
-                <EditText
-                    android:id="@+id/editTextAmount"
-                    style="@style/EditTextStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/enter_amount"
-                    android:importantForAutofill="no"
-                    android:inputType="numberDecimal"
-                    android:padding="8dp"
-                    android:text="1" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    app:cardCornerRadius="4dp"
-                    app:strokeColor="@color/border_color"
-                    app:strokeWidth="1dp">
-
-                    <androidx.appcompat.widget.AppCompatSpinner
-                        android:id="@+id/spinnerCurrency"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="9dp"
-                        android:prompt="@string/select_currency"
-                        android:spinnerMode="dialog" />
-
-                </com.google.android.material.card.MaterialCardView>
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/textLastRefreshed"
-                android:layout_width="wrap_content"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/spinnerContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/input"
-                android:layout_marginTop="8dp"
-                tools:text="Last refreshed on " />
+                android:layout_below="@+id/editTextAmount"
+                android:layout_marginTop="4dp"
+                app:cardCornerRadius="4dp"
+                app:strokeColor="@color/border_color"
+                app:strokeWidth="1dp">
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/spinnerCurrency"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="9dp"
+                    android:prompt="@string/select_currency"
+                    android:spinnerMode="dialog" />
+
+            </com.google.android.material.card.MaterialCardView>
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewCurrencies"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textLastRefreshed"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/spinnerContainer"
                 android:layout_marginTop="16dp" />
 
 
@@ -95,11 +82,11 @@
             android:visibility="@{viewModel.viewState instanceof ConverterViewState.Loading ? View.VISIBLE : View.GONE}" />
 
         <TextView
-            android:gravity="center_horizontal"
             android:id="@+id/txtErrorMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:gravity="center_horizontal"
             android:visibility="@{viewModel.viewState instanceof ConverterViewState.Error ? View.VISIBLE : View.GONE}"
             tools:text="Something went wrong!" />
 
