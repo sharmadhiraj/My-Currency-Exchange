@@ -7,6 +7,7 @@ import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
@@ -115,5 +116,6 @@ class ExchangeRatesRemoteDataSourceTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        unmockkAll()
     }
 }

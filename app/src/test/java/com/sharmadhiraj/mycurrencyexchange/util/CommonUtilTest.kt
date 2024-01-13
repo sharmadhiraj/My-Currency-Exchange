@@ -1,5 +1,8 @@
 package com.sharmadhiraj.mycurrencyexchange.util
 
+import io.mockk.clearAllMocks
+import io.mockk.unmockkAll
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -49,7 +52,7 @@ class CommonUtilTest {
     }
 
     @Test
-    fun `convertCurrency should convert currency correctly`() {
+    fun `convertCurrency should convert currency correctly #1`() {
         // Given
         val amount = 10.0
         val selectedCurrency = "EUR"
@@ -60,6 +63,21 @@ class CommonUtilTest {
 
         // Then
         val expectedConvertedAmounts = mapOf("USD" to 15.0, "GBP" to 12.0, "EUR" to 10.0)
+        assertEquals(expectedConvertedAmounts, convertedAmounts)
+    }
+
+    @Test
+    fun `convertCurrency should convert currency correctly #2`() {
+        // Given
+        val amount = 145.50
+        val selectedCurrency = "EUR"
+        val exchangeRates = mapOf("USD" to 1.5, "GBP" to 1.2, "EUR" to 1.0)
+
+        // When
+        val convertedAmounts = CommonUtil.convertCurrency(amount, selectedCurrency, exchangeRates)
+
+        // Then
+        val expectedConvertedAmounts = mapOf("USD" to 218.25, "GBP" to 174.6, "EUR" to 145.5)
         assertEquals(expectedConvertedAmounts, convertedAmounts)
     }
 
@@ -88,4 +106,11 @@ class CommonUtilTest {
         // Then
         assertTrue(result)
     }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
+        unmockkAll()
+    }
+
 }

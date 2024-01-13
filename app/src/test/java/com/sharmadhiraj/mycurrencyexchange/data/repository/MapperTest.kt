@@ -2,6 +2,9 @@ package com.sharmadhiraj.mycurrencyexchange.data.repository
 
 import com.sharmadhiraj.mycurrencyexchange.data.local.entity.ExchangeRatesEntity
 import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
+import io.mockk.clearAllMocks
+import io.mockk.unmockkAll
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -33,5 +36,11 @@ class MapperTest {
         assertEquals(domain.base, entity.base)
         assertEquals(domain.timestamp, entity.timestamp)
         assertEquals(domain.rates, entity.rates)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
+        unmockkAll()
     }
 }

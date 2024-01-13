@@ -2,6 +2,7 @@ package com.sharmadhiraj.mycurrencyexchange.data.local
 
 import com.google.gson.Gson
 import io.mockk.clearAllMocks
+import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -66,5 +67,6 @@ class ConvertersTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        unmockkAll()
     }
 }

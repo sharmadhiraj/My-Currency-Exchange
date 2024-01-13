@@ -6,6 +6,7 @@ import com.sharmadhiraj.mycurrencyexchange.data.local.entity.ExchangeRatesEntity
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.runBlocking
@@ -58,6 +59,7 @@ class ExchangeRatesLocalDataSourceTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        unmockkAll()
     }
 
     private fun createExchangeRatesEntity(): ExchangeRatesEntity {

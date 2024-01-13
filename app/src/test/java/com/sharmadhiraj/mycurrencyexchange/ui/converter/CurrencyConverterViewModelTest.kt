@@ -10,8 +10,12 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -22,6 +26,8 @@ class CurrencyConverterViewModelTest {
 
     private lateinit var viewModel: CurrencyConverterViewModel
     private lateinit var repository: ExchangeRatesRepositoryImpl
+    private val testDispatcher = StandardTestDispatcher()
+    private val testCoroutineScope = TestScope(testDispatcher)
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
@@ -56,6 +62,7 @@ class CurrencyConverterViewModelTest {
         viewModel.fetchExchangeRates()
 
         //Then
+        testCoroutineScope.advanceUntilIdle()
         coVerify {
             repository.getExchangeRates()
         }
@@ -75,6 +82,7 @@ class CurrencyConverterViewModelTest {
         }
 
         //Then
+        testCoroutineScope.advanceUntilIdle()
         assert(viewModel.viewState.value is ConverterViewState.Error)
         assertEquals("Error", (viewModel.viewState.value as ConverterViewState.Error).errorMessage)
     }
@@ -83,10 +91,16 @@ class CurrencyConverterViewModelTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        unmockkAll()
     }
 
     companion object {
         private val mockExchangeRates =
-            ExchangeRates("USD", 1705024800, mapOf("EUR" to 1.5, "GBP" to 1.2))
+            ExchangeRates(
+                "USD",
+                1705024800, mapOf(
+                    "EUR" to 1.5, "GBP" to 1.2
+                )
+            )
     }
 }

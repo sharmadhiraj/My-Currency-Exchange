@@ -11,6 +11,7 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -99,6 +100,7 @@ class ExchangeRatesRepositoryImplTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        unmockkAll()
     }
 
     private fun createMockExchangeRatesEntity(isExpired: Boolean = false): ExchangeRatesEntity {
