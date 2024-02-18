@@ -21,7 +21,7 @@ class ConverterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConverterBinding
     private val viewModel: CurrencyConverterViewModel by viewModels()
-    private val exchangeRateRecyclerViewAdapter = CurrenciesAdapter()
+    private val currenciesAdapter = CurrenciesAdapter()
     private lateinit var exchangeRateSpinnerAdapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +55,7 @@ class ConverterActivity : AppCompatActivity() {
         viewModel.convertedAmounts.observe(
             this
         ) { exchangeRates ->
-            exchangeRateRecyclerViewAdapter.setExchangeRates(exchangeRates)
+            currenciesAdapter.setExchangeRates(exchangeRates)
         }
         viewModel.fetchExchangeRates()
     }
@@ -98,7 +98,7 @@ class ConverterActivity : AppCompatActivity() {
 
     private fun initRecyclerView() {
         binding.recyclerViewCurrencies.layoutManager = GridLayoutManager(this, 2)
-        binding.recyclerViewCurrencies.adapter = exchangeRateRecyclerViewAdapter
+        binding.recyclerViewCurrencies.adapter = currenciesAdapter
     }
 
     private fun convertCurrency() {

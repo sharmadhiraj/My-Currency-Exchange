@@ -2,6 +2,7 @@ package com.sharmadhiraj.mycurrencyexchange.util
 
 import android.util.Log
 import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -53,5 +54,7 @@ object CommonUtil {
     ): Double {
         return exchangeRates.firstOrNull { e -> e.fullName() == selectedCurrency }?.rate ?: 1.0
     }
+
+    val currencyFormat: DecimalFormat = DecimalFormat("#,##0.00")
 
 }

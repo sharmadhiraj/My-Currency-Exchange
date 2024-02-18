@@ -1,39 +1,46 @@
 package com.sharmadhiraj.mycurrencyexchange.ui.converter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.sharmadhiraj.mycurrencyexchange.R
+import com.sharmadhiraj.mycurrencyexchange.databinding.ItemExchangeRateBinding
 import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
-import java.text.DecimalFormat
 
-class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
-
-    private var currencies: List<Currency> = emptyList()
-
-    fun setExchangeRates(updatedCurrencies: List<Currency>) {
-        currencies = updatedCurrencies
-        notifyDataSetChanged()
-    }
+class CurrenciesAdapter :
+    ListAdapter<Currency, CurrenciesAdapter.ViewHolder>(CurrencyDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_exchange_rate, parent, false)
-        return ViewHolder(view)
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = ItemExchangeRateBinding.inflate(layoutInflater, parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textCurrencyCode.text = currencies[position].name
-        holder.textExchangeRate.text =
-            currencies[position].code + " " + DecimalFormat("#,##0.00").format(currencies[position].rate)
+        val currency = getItem(position)
+        holder.bind(currency)
     }
 
-    override fun getItemCount(): Int = currencies.size
+    fun setExchangeRates(exchangeRates: List<Currency>) {
+        submitList(exchangeRates)
+    }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val textCurrencyCode: TextView = itemView.findViewById(R.id.textCurrencyCode)
-        val textExchangeRate: TextView = itemView.findViewById(R.id.textExchangeRate)
+    inner class ViewHolder(private val binding: ItemExchangeRateBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(currency: Currency) {
+            binding.currency = currency
+            binding.executePendingBindings()
+        }
+    }
+
+    private class CurrencyDiffCallback : DiffUtil.ItemCallback<Currency>() {
+        override fun areItemsTheSame(oldItem: Currency, newItem: Currency): Boolean {
+            return oldItem.code == newItem.code
+        }
+
+        override fun areContentsTheSame(oldItem: Currency, newItem: Currency): Boolean {
+            return oldItem == newItem
+        }
     }
 }
