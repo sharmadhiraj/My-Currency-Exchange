@@ -9,9 +9,7 @@ import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchEx
 import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
 import com.sharmadhiraj.mycurrencyexchange.util.CommonUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -27,16 +25,12 @@ class CurrencyConverterViewModel @Inject constructor(private val repository: Cur
 
     fun fetchExchangeRates() {
         _viewState.value = ConverterViewState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
                 val rates = repository.getCurrencies()
-                withContext(Dispatchers.Main) {
-                    _viewState.value = ConverterViewState.Success(rates)
-                }
+                _viewState.value = ConverterViewState.Success(rates)
             } catch (e: ExchangeRatesFetchException) {
-                withContext(Dispatchers.Main) {
-                    _viewState.value = ConverterViewState.Error(e.message ?: "Unknown error")
-                }
+                _viewState.value = ConverterViewState.Error(e.message ?: "Unknown error")
             }
         }
     }
