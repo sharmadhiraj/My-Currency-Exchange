@@ -33,6 +33,7 @@
 
 
             <EditText
+                android:layout_marginTop="96dp"
                 android:id="@+id/editTextAmount"
                 style="@style/EditTextStyle"
                 android:layout_width="match_parent"
