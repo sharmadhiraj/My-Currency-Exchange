@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="currency_primary">#1976D2</color>
-    <color name="currency_primary_variant">#1565C0</color>
-    <color name="currency_on_primary">#FFFFFF</color>
-
-    <color name="currency_secondary">#4CAF50</color>
-    <color name="currency_secondary_variant">#388E3C</color>
-    <color name="currency_on_secondary">#000000</color>
-
-    <color name="border_color">#AAAAAA</color>
-    <color name="edit_text_text_color">#000000</color>
-
-
+    <color name="brand_primary">#1976D2</color>
+    <color name="brand_on_primary">#FFFFFF</color>
+    <color name="brand_primary_dark">#90CAF9</color>
+    <color name="brand_on_primary_dark">#0B2A4A</color>
 </resources>

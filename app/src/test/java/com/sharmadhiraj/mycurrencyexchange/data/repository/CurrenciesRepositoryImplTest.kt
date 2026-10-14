@@ -1,132 +1,115 @@
 package com.sharmadhiraj.mycurrencyexchange.data.repository
 
 import com.sharmadhiraj.mycurrencyexchange.data.local.CurrenciesLocalDataSource
-import com.sharmadhiraj.mycurrencyexchange.data.local.dao.CurrencyDao
 import com.sharmadhiraj.mycurrencyexchange.data.local.entity.CurrencyEntity
 import com.sharmadhiraj.mycurrencyexchange.data.remote.CurrenciesRemoteDataSource
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiException
-import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesFetchException
+import com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesUnavailableException
 import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
-import io.mockk.clearAllMocks
+import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
-import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Before
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.IOException
 
 class CurrenciesRepositoryImplTest {
 
-    private lateinit var repository: CurrenciesRepositoryImpl
-    private lateinit var remoteDataSource: CurrenciesRemoteDataSource
-    private lateinit var localDataSource: CurrenciesLocalDataSource
-    private lateinit var exchangeDataPreferences: ExchangeDataCacheValidator
-    private val currencyDao: CurrencyDao = mockk()
+    private val remote: CurrenciesRemoteDataSource = mockk()
+    private val local: CurrenciesLocalDataSource = mockk()
+    private val cachePolicy: RatesCachePolicy = mockk()
+    private val repository = CurrenciesRepositoryImpl(remote, local, cachePolicy)
 
-    @Before
-    fun setup() {
-        remoteDataSource = mockk()
-        exchangeDataPreferences = mockk()
-        localDataSource = CurrenciesLocalDataSource(currencyDao)
-        repository =
-            CurrenciesRepositoryImpl(remoteDataSource, localDataSource, exchangeDataPreferences)
+    private val cachedEntities = listOf(CurrencyEntity("USD", "United States Dollar", 1.0))
+    private val cached = listOf(Currency("USD", "United States Dollar", 1.0))
+    private val fetched = listOf(Currency("USD", "United States Dollar", 1.5))
+
+    private fun givenCache(entities: List<CurrencyEntity>, fresh: Boolean) {
+        coEvery { local.getCurrencies() } returns entities
+        every { cachePolicy.isFresh() } returns fresh
+        every { cachePolicy.lastRefreshMillis() } returns LAST_REFRESH
     }
 
     @Test
-    fun `getCurrencies - when local data is not expired - should return local data`() {
-        // Given
-        val localData = createMockCurrencyEntities()
-        coEvery { localDataSource.getCurrencies() } returns localData
-        coEvery { exchangeDataPreferences.isCacheValid() } returns true
+    fun `fresh cache is returned without calling the network`() = runBlocking {
+        givenCache(cachedEntities, fresh = true)
 
-        // When
-        val result = runBlocking { repository.getCurrencies() }
+        val result = repository.getExchangeRates()
 
-        // Then
-        coVerify(inverse = true) { remoteDataSource.getCurrencies() }
-        assertEquals(Mapper.mapCurrencyEntityToDomain(localData), result)
+        assertEquals(ExchangeRates(cached, LAST_REFRESH), result)
+        coVerify(exactly = 0) { remote.getCurrencies() }
     }
 
     @Test
-    fun `getCurrencies - when local data is expired - should return remote data and save to local`() {
-        // Given
-        val localData = createMockCurrencyEntities()
-        val remoteData = createCurrencies()
-        coEvery { currencyDao.saveCurrencies(any()) } returns Unit
-        coEvery { localDataSource.getCurrencies() } returns localData
-        coEvery { remoteDataSource.getCurrencies() } returns remoteData
-        coEvery { exchangeDataPreferences.updateLastRefreshTime() } returns Unit
-        coEvery { exchangeDataPreferences.isCacheValid() } returns false
+    fun `expired cache triggers a fetch that is saved and returned`() = runBlocking {
+        givenCache(cachedEntities, fresh = false)
+        coEvery { remote.getCurrencies() } returns fetched
+        coEvery { local.replaceCurrencies(any()) } returns Unit
+        every { cachePolicy.markRefreshed() } returns Unit
 
-        // When
-        val result = runBlocking { repository.getCurrencies() }
+        val result = repository.getExchangeRates()
 
-        // Then
-        coVerify { remoteDataSource.getCurrencies() }
-        coVerify { currencyDao.saveCurrencies(any()) }
-        assertNotEquals(Mapper.mapCurrencyEntityToDomain(localData), result)
+        assertEquals(ExchangeRates(fetched, LAST_REFRESH), result)
+        coVerify { local.replaceCurrencies(listOf(CurrencyEntity("USD", "United States Dollar", 1.5))) }
+        verify { cachePolicy.markRefreshed() }
     }
 
     @Test
-    fun `getCurrencies - when remote data fail and local data is available (expired) - should return local data`() {
-        // Given
-        val localData = createMockCurrencyEntities()
-        coEvery { localDataSource.getCurrencies() } returns localData
-        coEvery { remoteDataSource.getCurrencies() } throws ApiException("Error")
-        coEvery { exchangeDataPreferences.isCacheValid() } returns false
+    fun `forceRefresh ignores a fresh cache`() = runBlocking {
+        givenCache(cachedEntities, fresh = true)
+        coEvery { remote.getCurrencies() } returns fetched
+        coEvery { local.replaceCurrencies(any()) } returns Unit
+        every { cachePolicy.markRefreshed() } returns Unit
 
-        // When
-        val result = runBlocking { repository.getCurrencies() }
+        val result = repository.getExchangeRates(forceRefresh = true)
 
-        // Then
-        coVerify { remoteDataSource.getCurrencies() }
-        coVerify { localDataSource.getCurrencies() }
-        assertEquals(Mapper.mapCurrencyEntityToDomain(localData), result)
+        assertEquals(fetched, result.currencies)
+        coVerify { remote.getCurrencies() }
     }
 
-    @Test(expected = ExchangeRatesFetchException::class)
-    fun `getCurrencies - when both local and remote data fail - should throw exception`() {
-        // Given
-        coEvery { localDataSource.getCurrencies() } returns null
-        coEvery { remoteDataSource.getCurrencies() } throws ApiException("Error")
+    @Test
+    fun `network failure falls back to stale cache`() = runBlocking {
+        givenCache(cachedEntities, fresh = false)
+        coEvery { remote.getCurrencies() } throws ApiException("Error")
 
-        // When
-        runBlocking { repository.getCurrencies() }
+        val result = repository.getExchangeRates()
 
-        // Then
-        // Exception will be thrown, function annotation @Test(expected = ExchangeRatesFetchException::class)
-        coVerify { remoteDataSource.getCurrencies() }
-        coVerify { localDataSource.getCurrencies() }
+        assertEquals(ExchangeRates(cached, LAST_REFRESH, isStale = true), result)
+        verify(exactly = 0) { cachePolicy.markRefreshed() }
     }
 
-    @After
-    fun tearDown() {
-        clearAllMocks()
-        unmockkAll()
+    @Test
+    fun `network failure with empty cache throws and flags connection problems`() {
+        givenCache(emptyList(), fresh = false)
+        coEvery { remote.getCurrencies() } throws ApiException("Error", IOException("offline"))
+
+        val exception = assertThrows(ExchangeRatesUnavailableException::class.java) {
+            runBlocking { repository.getExchangeRates() }
+        }
+
+        assertTrue(exception.isNetworkError)
     }
 
-    private fun createMockCurrencyEntities(): List<CurrencyEntity> {
-        return listOf(
-            CurrencyEntity(
-                "USD",
-                "United States Dollar",
-                1.2
-            )
-        )
+    @Test
+    fun `service failure with empty cache is not flagged as a connection problem`() {
+        givenCache(emptyList(), fresh = false)
+        coEvery { remote.getCurrencies() } throws ApiException("Unsuccessful response status code 401")
+
+        val exception = assertThrows(ExchangeRatesUnavailableException::class.java) {
+            runBlocking { repository.getExchangeRates() }
+        }
+
+        assertFalse(exception.isNetworkError)
     }
 
-
-    private fun createCurrencies(): List<Currency> {
-        return listOf(
-            Currency(
-                "USD",
-                "United States Dollar",
-                1.5
-            )
-        )
+    private companion object {
+        const val LAST_REFRESH = 1_000L
     }
 }

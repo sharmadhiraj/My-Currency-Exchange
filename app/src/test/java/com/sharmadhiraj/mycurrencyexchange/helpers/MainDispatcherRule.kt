@@ -13,15 +13,14 @@ import org.junit.runner.Description
 class MainDispatcherRule(
     private val dispatcher: TestDispatcher = UnconfinedTestDispatcher()
 ) : InstantTaskExecutorRule() {
+
     override fun starting(description: Description) {
         super.starting(description)
-
         Dispatchers.setMain(dispatcher)
     }
 
     override fun finished(description: Description) {
         super.finished(description)
-
         Dispatchers.resetMain()
     }
 }

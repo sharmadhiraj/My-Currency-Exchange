@@ -1,95 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.converter.ConverterActivity">
 
-    <data>
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
-        <import type="android.view.View" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/app_name" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <import type="com.sharmadhiraj.mycurrencyexchange.ui.converter.ConverterViewState" />
-
-        <variable
-            name="viewModel"
-            type="com.sharmadhiraj.mycurrencyexchange.ui.converter.CurrencyConverterViewModel" />
-    </data>
-
-
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="16dp"
-        android:paddingTop="16dp"
-        android:paddingRight="16dp"
-        android:paddingBottom="16dp"
-        tools:context=".ui.converter.ConverterActivity">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <RelativeLayout
-            android:id="@+id/container"
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+
+        <LinearLayout
+            android:id="@+id/errorGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                tools:text="@string/error_loading_rates" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonRetry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/action_retry" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/contentGroup"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="@{viewModel.viewState instanceof ConverterViewState.Success ? View.VISIBLE : View.GONE}">
+            android:orientation="vertical"
+            android:visibility="gone">
 
-
-            <EditText
-                android:layout_marginTop="96dp"
-                android:id="@+id/editTextAmount"
-                style="@style/EditTextStyle"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputLayoutAmount"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/enter_amount"
-                android:importantForAutofill="no"
-                android:inputType="numberDecimal"
-                android:padding="8dp"
-                android:text="1" />
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:hint="@string/amount_label">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/spinnerContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/editTextAmount"
-                android:layout_marginTop="4dp"
-                app:cardCornerRadius="4dp"
-                app:strokeColor="@color/border_color"
-                app:strokeWidth="1dp">
-
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/spinnerCurrency"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editAmount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="9dp"
-                    android:prompt="@string/select_currency"
-                    android:spinnerMode="dialog" />
+                    android:imeOptions="actionDone|flagNoExtractUi"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-            </com.google.android.material.card.MaterialCardView>
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewCurrencies"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputLayoutCurrency"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/spinnerContainer"
-                android:layout_marginTop="16dp" />
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:hint="@string/currency_label">
 
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dropdownCurrency"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone|flagNoExtractUi"
+                    android:inputType="text"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/textStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:visibility="gone"
+                tools:text="Updated 14 Oct 2026, 10:30"
+                tools:visibility="visible" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="@{viewModel.viewState instanceof ConverterViewState.Loading ? View.VISIBLE : View.GONE}" />
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeRefresh"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/txtErrorMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center_horizontal"
-            android:visibility="@{viewModel.viewState instanceof ConverterViewState.Error ? View.VISIBLE : View.GONE}"
-            tools:text="Something went wrong!" />
-
-    </RelativeLayout>
-</layout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerRates"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingHorizontal="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="16dp"
+                    tools:itemCount="6"
+                    tools:listitem="@layout/item_converted_amount" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </LinearLayout>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

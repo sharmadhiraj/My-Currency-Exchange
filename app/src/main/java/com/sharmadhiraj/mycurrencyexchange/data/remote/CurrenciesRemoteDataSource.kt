@@ -1,37 +1,28 @@
 package com.sharmadhiraj.mycurrencyexchange.data.remote
 
-import com.sharmadhiraj.mycurrencyexchange.BuildConfig
-import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiClient
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiException
 import com.sharmadhiraj.mycurrencyexchange.data.remote.api.ApiService
+import com.sharmadhiraj.mycurrencyexchange.data.remote.api.safeApiCall
+import com.sharmadhiraj.mycurrencyexchange.di.OpenExchangeRatesAppId
 import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
+class CurrenciesRemoteDataSource @Inject constructor(
+    private val apiService: ApiService,
+    @param:OpenExchangeRatesAppId private val appId: String,
+) {
 
-class CurrenciesRemoteDataSource @Inject constructor(private val apiService: ApiService) {
+    /** Fetches rates and names in parallel and joins them. Currencies without a rate are dropped. */
+    suspend fun getCurrencies(): List<Currency> = coroutineScope {
+        val rates = async { safeApiCall { apiService.getLatestExchangeRates(appId) }.rates.orEmpty() }
+        val names = async { safeApiCall { apiService.getCurrencies(appId) } }
 
-    suspend fun getCurrencies(): List<Currency> {
-        try {
-            val currenciesWithExchangeRate = mutableListOf<Currency>()
-            val exchangeRates = ApiClient.fetchData {
-                apiService.getLatestExchangeRates(BuildConfig.OPEN_EXCHANGE_RATES_APP_ID)
-            }.rates!!
-            val currencies = ApiClient.fetchData {
-                apiService.getCurrencies(BuildConfig.OPEN_EXCHANGE_RATES_APP_ID)
-            }!!
-            for (currency in currencies) {
-                currenciesWithExchangeRate.add(
-                    Currency(
-                        currency.key,
-                        currency.value,
-                        exchangeRates[currency.key] ?: 1.0
-                    )
-                )
-            }
-
-            return currenciesWithExchangeRate
-        } catch (e: Exception) {
-            throw ApiException(e.message ?: "", e)
-        }
+        val rateByCode = rates.await()
+        names.await()
+            .mapNotNull { (code, name) -> rateByCode[code]?.let { Currency(code, name, it) } }
+            .sortedBy { it.code }
+            .ifEmpty { throw ApiException("No exchange rates returned") }
     }
 }

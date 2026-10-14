@@ -1,7 +1,9 @@
 package com.sharmadhiraj.mycurrencyexchange.domain.repository
 
-import com.sharmadhiraj.mycurrencyexchange.domain.model.Currency
+import com.sharmadhiraj.mycurrencyexchange.domain.model.ExchangeRates
 
 interface ExchangeRatesRepository {
-    suspend fun getCurrencies(): List<Currency>
+
+    /** @throws com.sharmadhiraj.mycurrencyexchange.domain.exception.ExchangeRatesUnavailableException when nothing is cached and the network fails. */
+    suspend fun getExchangeRates(forceRefresh: Boolean = false): ExchangeRates
 }

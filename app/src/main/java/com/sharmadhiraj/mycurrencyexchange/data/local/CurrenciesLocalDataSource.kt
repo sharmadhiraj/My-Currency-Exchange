@@ -6,11 +6,9 @@ import javax.inject.Inject
 
 class CurrenciesLocalDataSource @Inject constructor(private val currencyDao: CurrencyDao) {
 
-    suspend fun getCurrencies(): List<CurrencyEntity>? {
-        return currencyDao.getCurrencies()
-    }
+    suspend fun getCurrencies(): List<CurrencyEntity> = currencyDao.getCurrencies()
 
-    suspend fun saveCurrencies(currencies: List<CurrencyEntity>) {
-        currencyDao.saveCurrencies(currencies)
+    suspend fun replaceCurrencies(currencies: List<CurrencyEntity>) {
+        currencyDao.replaceCurrencies(currencies)
     }
 }
